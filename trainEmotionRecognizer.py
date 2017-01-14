@@ -11,6 +11,7 @@ emotionDict = {0: "angry", 1: "disgust", 2: "fear", 3: "happy", 4: "sad", 5: "su
 # X: (n_samples, 1, 48, 48)
 # Y: (n_samples, n_category)
 X = np.load("data/X_train.npy")
+# Load and one-hot-encode
 Y = to_categorical(np.load("data/Y_train.npy"))
 
 print "X shape: {0}\nY shape: {1}".format(X.shape, Y.shape)

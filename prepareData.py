@@ -17,14 +17,15 @@ for i in range(df.shape[0]):
     label = df['emotion'][i]
     img_pixels = img_pixels.split(' ')
     img = np.reshape(np.array(img_pixels, dtype=np.uint8), (48, 48))
+    # Little preprocessing
     img = cv2.equalizeHist(img)
-    img = np.reshape(img, (1,48,48))
+    img = np.reshape(img, (1, 48, 48))
 
     X.append(img)
     Y.append(label)
 
     if i % 1000 == 0:
-        print "Row {0} is done!".format(i)
+        print "{0} rows done!".format(i)
 
 X = np.array(X)
 Y = np.array(Y)
