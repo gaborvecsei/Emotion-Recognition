@@ -18,6 +18,7 @@ for i in range(df.shape[0]):
     img_pixels = img_pixels.split(' ')
     img = np.reshape(np.array(img_pixels, dtype=np.uint8), (48, 48))
     img = cv2.equalizeHist(img)
+    img = np.reshape(img, (1,48,48))
 
     X.append(img)
     Y.append(label)

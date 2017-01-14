@@ -3,22 +3,28 @@ import numpy as np
 from keras.callbacks import ModelCheckpoint
 from keras.layers import Convolution2D, MaxPooling2D, Dense, Flatten, Dropout
 from keras.models import Sequential
+from keras.utils.np_utils import to_categorical
 
 emotionDict = {0: "angry", 1: "disgust", 2: "fear", 3: "happy", 4: "sad", 5: "surprise", 6: "neutral"}
 
-X = np.load("data/X.npy")
-Y = np.load("data/Y.npy")
+# Train data
+# X: (n_samples, 1, 48, 48)
+# Y: (n_samples, n_category)
+X = np.load("data/X_train.npy")
+Y = to_categorical(np.load("data/Y_train.npy"))
 
-print "X shape: {0}, Y shape: {1}".format(X.shape, Y.shape)
+print "X shape: {0}\nY shape: {1}".format(X.shape, Y.shape)
 
-image_shape = (X.shape[1], X.shape[2])
+image_shape = (X.shape[2], X.shape[3])
+train_image_shape = (1,) + image_shape
 print "Image shape: {0}".format(image_shape)
+print "Train image shape: {0}".format(train_image_shape)
 
 batch_size = 64
 nb_epoch = 100
 
 model = Sequential()
-model.add(Convolution2D(32, 3, 3, border_mode='same', activation='relu', input_shape=image_shape))
+model.add(Convolution2D(32, 3, 3, border_mode='same', activation='relu', input_shape=train_image_shape))
 model.add(Dropout(0.3))
 model.add(Convolution2D(32, 3, 3, border_mode='same', activation='relu'))
 model.add(Dropout(0.3))
