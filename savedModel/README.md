@@ -1,3 +1,3 @@
 # Saved Model
 
-Here we store our trained models
+Here we store our trained models files
