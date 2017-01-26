@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from utils import dataGenerator
 from keras.callbacks import ModelCheckpoint
 from keras.layers import Convolution2D, MaxPooling2D, Dense, Flatten, Dropout
 from keras.models import Sequential
@@ -14,9 +15,9 @@ emotionDict = {0: "angry", 1: "disgust", 2: "fear", 3: "happy", 4: "sad", 5: "su
 # Y: (n_samples, n_category)
 X = np.load("data/X_train.npy")
 # Load and one-hot-encode
-Y = to_categorical(np.load("data/Y_train.npy"))
+y = to_categorical(np.load("data/Y_train.npy"))
 
-print "X shape: {0}\nY shape: {1}".format(X.shape, Y.shape)
+print "X shape: {0}\nY shape: {1}".format(X.shape, y.shape)
 
 image_shape = (X.shape[2], X.shape[3])
 train_image_shape = (1,) + image_shape
@@ -47,17 +48,18 @@ model.add(Dense(len(emotionDict), activation='softmax'))
 
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-checkPoint = ModelCheckpoint("savedModel/weights-{epoch:02d}-{val_loss:.2f}.hdf5", monitor="val_loss",
+checkPoint = ModelCheckpoint("savedModel/weights-{epoch:02d}-{loss:.2f}.hdf5", monitor="loss",
                              save_best_only=True,
                              save_weights_only=False)
 callbacks = [checkPoint]
 
-hist = model.fit(X, Y, nb_epoch=nb_epoch, batch_size=batch_size, validation_split=0.2, shuffle=True,
-                 verbose=1, callbacks=callbacks)
+# hist = model.fit(X, Y, nb_epoch=nb_epoch, batch_size=batch_size, validation_split=0.2, shuffle=True, verbose=1, callbacks=callbacks)
+
+hist = model.fit_generator(dataGenerator(256, X, y), samples_per_epoch=10240, nb_epoch=nb_epoch, verbose=1, callbacks=callbacks)
 
 print "Model is trained!"
 
-metrics = model.evaluate(X, Y, batch_size=batch_size, verbose=0)
+metrics = model.evaluate(X, y, batch_size=batch_size, verbose=0)
 print "Metrics: {0}".format(metrics)
 print "Model loss: {0}".format(metrics[0])
 print "Model acc: {0}".format(metrics[1])
