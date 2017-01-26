@@ -4,6 +4,8 @@ from keras.callbacks import ModelCheckpoint
 from keras.layers import Convolution2D, MaxPooling2D, Dense, Flatten, Dropout
 from keras.models import Sequential
 from keras.utils.np_utils import to_categorical
+from keras import backend as K
+K.set_image_dim_ordering('th')
 
 emotionDict = {0: "angry", 1: "disgust", 2: "fear", 3: "happy", 4: "sad", 5: "surprise", 6: "neutral"}
 
@@ -21,35 +23,23 @@ train_image_shape = (1,) + image_shape
 print "Image shape: {0}".format(image_shape)
 print "Train image shape: {0}".format(train_image_shape)
 
-batch_size = 64
-nb_epoch = 100
+batch_size = 8
+nb_epoch = 50
 
 model = Sequential()
 model.add(Convolution2D(32, 3, 3, border_mode='same', activation='relu', input_shape=train_image_shape))
-model.add(Dropout(0.3))
-model.add(Convolution2D(32, 3, 3, border_mode='same', activation='relu'))
-model.add(Dropout(0.3))
-model.add(Convolution2D(32, 3, 3, border_mode='same', activation='relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 
 model.add(Convolution2D(64, 3, 3, border_mode='same', activation='relu'))
-model.add(Dropout(0.3))
-model.add(Convolution2D(64, 3, 3, border_mode='same', activation='relu'))
-model.add(Dropout(0.3))
-model.add(Convolution2D(64, 3, 3, border_mode='same', activation='relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 
-model.add(Convolution2D(128, 3, 3, border_mode='same', activation='relu'))
-model.add(Dropout(0.3))
-model.add(Convolution2D(128, 3, 3, border_mode='same', activation='relu'))
-model.add(Dropout(0.3))
 model.add(Convolution2D(128, 3, 3, border_mode='same', activation='relu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 
 model.add(Flatten())
-model.add(Dense(256, activation='relu'))
+model.add(Dense(512, activation='relu'))
 model.add(Dropout(0.5))
-model.add(Dense(64, activation='relu'))
+model.add(Dense(128, activation='relu'))
 model.add(Dropout(0.5))
 model.add(Dense(32, activation='relu'))
 model.add(Dropout(0.5))
