@@ -3,3 +3,5 @@
 *.jpg
 *.png
 *.jpeg
+*.pyc
+*.hdf5

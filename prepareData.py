@@ -11,7 +11,7 @@ DATA_AUGMENTATION = True
 df = pd.read_csv('data/fer2013.csv', header=0)
 
 labels = list(df['emotion'])
-print "Label frequencies: {0}".format(dict(Counter(labels)))
+print ("Label frequencies: {0}".format(dict(Counter(labels))))
 
 X = []
 Y = []
@@ -38,14 +38,14 @@ for i in range(df.shape[0]):
         Y.append(label)
 
     if i % 1000 == 0:
-        print "{0} rows done!".format(i)
+        print ("{0} rows done!".format(i))
 
 X = np.array(X)
 Y = np.array(Y)
 
-print "X shape: {0}\nY shape: {1}".format(X.shape, Y.shape)
+print ("X shape: {0}\nY shape: {1}".format(X.shape, Y.shape))
 
 np.save("data/X_train.npy", X)
 np.save("data/Y_train.npy", Y)
 
-print "Arrays are saved!"
+print ("Arrays are saved!")
