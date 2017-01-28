@@ -1,6 +1,8 @@
-import numpy as np
 import cv2
+import numpy as np
 
+
+emotionDict = {0: "angry", 1: "disgust", 2: "fear", 3: "happy", 4: "sad", 5: "surprise", 6: "neutral"}
 
 def preprocessImage(image):
     tmpImg = cv2.GaussianBlur(image, (3, 3), 5)
@@ -15,7 +17,8 @@ def flipImage(image):
     # Horizontal flip
     return cv2.flip(image, 1)
 
-def splitData(X,y,percentage):
+
+def splitData(X, y, percentage):
     s = X.shape
     mask = np.random.rand(s[0]) <= percentage
     X_train = X[mask]

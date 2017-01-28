@@ -30,6 +30,7 @@ for i in range(df.shape[0]):
     X.append(extendedImg)
     y.append(label)
 
+    # Flip the image horizontally
     if DATA_AUGMENTATION:
         flippedImg = flipImage(processedImage)
         extendedFlippedImg = np.reshape(flippedImg, (1, 48, 48))
