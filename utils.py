@@ -1,6 +1,5 @@
 import numpy as np
 import cv2
-import random
 
 
 def preprocessImage(image):
@@ -16,14 +15,11 @@ def flipImage(image):
     # Horizontal flip
     return cv2.flip(image, 1)
 
-
-def dataGenerator(batch_size, X, y):
-    while 1:
-        batch_X, batch_y = [], []
-        for i in range(batch_size):
-            randomIndex = random.randint(0, len(X) - 1)
-            label = y[randomIndex]
-            image = X[randomIndex]
-            batch_X.append(image)
-            batch_y.append(label)
-        yield np.array(batch_X), np.array(batch_y)
+def splitData(X,y,percentage):
+    s = X.shape
+    mask = np.random.rand(s[0]) <= percentage
+    X_train = X[mask]
+    y_train = y[mask]
+    X_test = X[~mask]
+    y_test = y[~mask]
+    return X_train, y_train, X_test, y_test

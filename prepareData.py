@@ -3,7 +3,7 @@ from collections import Counter
 import numpy as np
 import pandas as pd
 
-from utils import preprocessImage, flipImage
+from utils import preprocessImage, flipImage, splitData
 
 # If it is true than the images are flipped horizontally to enrich data
 DATA_AUGMENTATION = True
@@ -11,10 +11,10 @@ DATA_AUGMENTATION = True
 df = pd.read_csv('data/fer2013.csv', header=0)
 
 labels = list(df['emotion'])
-print ("Label frequencies: {0}".format(dict(Counter(labels))))
+print("Label frequencies: {0}".format(dict(Counter(labels))))
 
 X = []
-Y = []
+y = []
 
 for i in range(df.shape[0]):
     img_pixels = df['pixels'][i]
@@ -28,24 +28,31 @@ for i in range(df.shape[0]):
     extendedImg = np.reshape(processedImage, (1, 48, 48))
 
     X.append(extendedImg)
-    Y.append(label)
+    y.append(label)
 
     if DATA_AUGMENTATION:
         flippedImg = flipImage(processedImage)
         extendedFlippedImg = np.reshape(flippedImg, (1, 48, 48))
 
         X.append(extendedFlippedImg)
-        Y.append(label)
+        y.append(label)
 
     if i % 1000 == 0:
-        print ("{0} rows done!".format(i))
+        print("{0} rows done!".format(i))
 
 X = np.array(X)
-Y = np.array(Y)
+y = np.array(y)
 
-print ("X shape: {0}\nY shape: {1}".format(X.shape, Y.shape))
+# Split the data: training - testing
+X_train, y_train, X_test, y_test = splitData(X, y, 0.9)
 
-np.save("data/X_train.npy", X)
-np.save("data/Y_train.npy", Y)
+print("X_train shape: {0}\ny_train shape: {1}".format(X_train.shape, y_train.shape))
+print("X_test shape: {0}\ny_test shape: {1}".format(X_test.shape, y_test.shape))
 
-print ("Arrays are saved!")
+np.save("data/X_train.npy", X_train)
+np.save("data/Y_train.npy", y_train)
+
+np.save("data/X_test.npy", X_test)
+np.save("data/Y_test.npy", y_test)
+
+print("Arrays are saved!")
