@@ -36,7 +36,7 @@ print("Image shape: {0}".format(image_shape))
 print("Train image shape: {0}".format(train_image_shape))
 
 batch_size = 256
-nb_epoch = 1
+nb_epoch = 50
 
 model = Sequential()
 model.add(Convolution2D(32, 3, 3, border_mode='same', activation='relu', input_shape=train_image_shape))
