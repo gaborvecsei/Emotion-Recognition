@@ -94,7 +94,7 @@ print("Saving model...")
 modelJson = model.to_json()
 with open(os.path.join(SAVE_MODEL_FOLDER_PATH, "model_structure.json", "w")) as json_file:
     json_file.write(modelJson)
-model.save_weights(os.path.join(SAVE_MODEL_FOLDER_PATH, "model_weights.h5"))
+model.save_weights(os.path.join(SAVE_MODEL_FOLDER_PATH, "model_weights_{0}_epochs.h5".format(nb_epoch)))
 model.save(os.path.join(SAVE_MODEL_FOLDER_PATH, "trained_model.h5"))
 print("Model is saved!")
 
