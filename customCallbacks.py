@@ -1,10 +1,19 @@
 import time
 
 from keras.callbacks import Callback
+from slackclient import SlackClient
 
 
 class LogTraining(Callback):
+    """
+    Logs the training at each epoch to a txt file
+    """
+
     def __init__(self, filePath):
+        """
+        :param filePath: Path to the file
+        """
+
         super().__init__()
         self.filePath = filePath
         self.startTime = None
@@ -26,3 +35,32 @@ class LogTraining(Callback):
     def appendTextToFile(self, text):
         with open(self.filePath, "a") as f:
             f.write(text + "\n")
+
+
+class SlackNotifier(Callback):
+    """
+    Sends you message at Slack when the training is finished
+    """
+
+    def __init__(self, slackToken, botName="Notifier Bot", channelName="Training Notification"):
+        """
+        :param slackToken: Generate token for your slack team: https://api.slack.com/docs/oauth-test-tokens
+        :param botName: Name of your bot (can be anything)
+        :param channelName: Name of an existing channel at your slack team
+        """
+
+        super().__init__()
+        self.botName = botName
+        self.channelName = channelName
+        self.slackToken = slackToken
+        self.slackClient = SlackClient(self.slackToken)
+
+    def on_train_end(self, logs={}):
+        super().on_train_end(logs)
+        self.sendNotification(
+            "Training ended! Check out the results: loss:{0:.2f}, acc:{1:.2f}".format(logs.get('loss'),
+                                                                                      logs.get('acc')))
+
+    def sendNotification(self, message):
+        self.slackClient.api_call('chat.postMessage', text=message, channel=self.channelName, username=self.botName,
+                                  icon_emoji=":robot_face:")
