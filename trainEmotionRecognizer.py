@@ -5,12 +5,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
 from keras import backend as K
-from keras.callbacks import ModelCheckpoint
+from keras.callbacks import ModelCheckpoint, TensorBoard
 from keras.layers import Convolution2D, MaxPooling2D, Dense, Flatten, Dropout
 from keras.models import Sequential
 from keras.utils.np_utils import to_categorical
 
-from customCallbacks import LogTraining
+from customCallbacks import LogTraining, SlackNotifier
 from dataGenerator import dataGenerator
 
 K.set_image_dim_ordering('th')
@@ -46,26 +46,27 @@ print("Train image shape: {0}".format(train_image_shape))
 print("Output layer dim: {0}".format(y_train.shape[1]))
 
 batch_size = 256
+samples_per_epoch = 20480
 nb_epoch = 10
 
 model = Sequential()
-model.add(Convolution2D(32, 3, 3, border_mode='same', activation='relu', input_shape=train_image_shape))
+model.add(Convolution2D(32, 3, 3, border_mode='same', activation='elu', input_shape=train_image_shape))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 
-model.add(Convolution2D(64, 3, 3, border_mode='same', activation='relu'))
+model.add(Convolution2D(64, 3, 3, border_mode='same', activation='elu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 
-model.add(Convolution2D(128, 3, 3, border_mode='same', activation='relu'))
+model.add(Convolution2D(128, 3, 3, border_mode='same', activation='elu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 
 model.add(Flatten())
-model.add(Dense(512, activation='relu'))
+model.add(Dense(512, activation='elu'))
 model.add(Dropout(0.5))
-model.add(Dense(128, activation='relu'))
+model.add(Dense(128, activation='elu'))
 model.add(Dropout(0.5))
-model.add(Dense(32, activation='relu'))
+model.add(Dense(32, activation='elu'))
 model.add(Dropout(0.5))
-model.add(Dense(len(y_train.shape[1]), activation='softmax'))
+model.add(Dense(y_train.shape[1], activation='softmax'))
 
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
@@ -74,15 +75,25 @@ checkPoint = ModelCheckpoint(os.path.join(CHECKPOINT_FOLDER_PATH, "weights-{epoc
                              save_best_only=True,
                              save_weights_only=True)
 logTraining = LogTraining(os.path.join(VISUALIZATION_FOLDER_PATH, "training_log_{0}_epochs.txt".format(nb_epoch)))
-callbacks = [checkPoint, logTraining]
+tensorboard = TensorBoard(log_dir=os.path.join(SAVE_MODEL_FOLDER_PATH, "tensorboard_logs"), histogram_freq=0,
+                          write_graph=False, write_images=True)
+callbacks = [checkPoint, logTraining, tensorboard]
 
 startTime = time.clock()
-hist = model.fit_generator(dataGenerator(batch_size, X_train, y_train), samples_per_epoch=20480, nb_epoch=nb_epoch,
+hist = model.fit_generator(dataGenerator(batch_size, X_train, y_train), samples_per_epoch=samples_per_epoch, nb_epoch=nb_epoch,
                            verbose=1,
                            callbacks=callbacks)
 endTime = time.clock()
 
 print("Model is trained in {0} seconds!".format(endTime - startTime))
+
+print("Saving model...")
+modelJson = model.to_json()
+with open(os.path.join(SAVE_MODEL_FOLDER_PATH, "model_structure.json"), "w") as json_file:
+    json_file.write(modelJson)
+model.save_weights(os.path.join(SAVE_MODEL_FOLDER_PATH, "model_weights_{0}_epochs.h5".format(nb_epoch)))
+model.save(os.path.join(SAVE_MODEL_FOLDER_PATH, "trained_model_{0}_epochs.h5".format(nb_epoch)))
+print("Model is saved!")
 
 print("Evaluating the model...")
 X_test = np.load(TEST_X_PATH).astype(np.float16)
@@ -92,22 +103,14 @@ print("Metrics: {0}".format(metrics))
 print("Model loss: {0}".format(metrics[0]))
 print("Model acc: {0}".format(metrics[1]))
 
-print("Saving model...")
-modelJson = model.to_json()
-with open(os.path.join(SAVE_MODEL_FOLDER_PATH, "model_structure.json", "w")) as json_file:
-    json_file.write(modelJson)
-model.save_weights(os.path.join(SAVE_MODEL_FOLDER_PATH, "model_weights_{0}_epochs.h5".format(nb_epoch)))
-model.save(os.path.join(SAVE_MODEL_FOLDER_PATH, "trained_model_{0}_epochs.h5".format(nb_epoch)))
-print("Model is saved!")
-
-plt.figure(figsize=(20, 10))
+plt.figure(figsize=(15, 10))
 plt.plot(hist.history['loss'])
 plt.title("Model loss")
 plt.xlabel("epoch")
 plt.legend(['loss'], loc='upper left')
 plt.savefig(os.path.join(VISUALIZATION_FOLDER_PATH, "train_loss_visualization_{0}_epochs.png".format(nb_epoch)))
 
-plt.figure(figsize=(20, 10))
+plt.figure(figsize=(15, 10))
 plt.plot(hist.history['acc'])
 plt.title("Model acc")
 plt.xlabel("epoch")

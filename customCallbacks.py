@@ -19,15 +19,15 @@ class LogTraining(Callback):
         self.startTime = None
         self.endTime = None
 
-    def on_train_begin(self, logs={}):
+    def on_train_begin(self, logs=None):
         self.startTime = time.clock()
         self.endTime = None
 
-    def on_epoch_end(self, epoch, logs={}):
+    def on_epoch_end(self, epoch, logs=None):
         text = "Epoch: {0}; Loss: {1}, Accuracy: {2}".format(epoch, logs.get('loss'), logs.get('acc'))
         self.appendTextToFile(text)
 
-    def on_train_end(self, logs={}):
+    def on_train_end(self, logs=None):
         self.endTime = time.clock()
         text = "Trained in: {0} seconds".format(self.endTime - self.startTime)
         self.appendTextToFile(text)
@@ -55,11 +55,18 @@ class SlackNotifier(Callback):
         self.slackToken = slackToken
         self.slackClient = SlackClient(self.slackToken)
 
-    def on_train_end(self, logs={}):
+        self.accs = []
+        self.losses = []
+
+    def on_epoch_end(self, epoch, logs=None):
+        super().on_epoch_end(epoch, logs)
+        self.accs.append(logs.get('acc'))
+        self.losses.append(logs.get('loss'))
+
+    def on_train_end(self, logs=None):
         super().on_train_end(logs)
         self.sendNotification(
-            "Training ended! Check out the results: loss:{0:.2f}, acc:{1:.2f}".format(logs.get('loss'),
-                                                                                      logs.get('acc')))
+            "Training ended! :smile: \n" + "Accuracy: {0}\nLoss: {1}".format(self.accs[-1], self.losses[-1]))
 
     def sendNotification(self, message):
         self.slackClient.api_call('chat.postMessage', text=message, channel=self.channelName, username=self.botName,
