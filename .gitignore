@@ -1,7 +1,6 @@
 *.csv
 *.npy
 *.jpg
-*.png
 *.jpeg
 *.pyc
 *.hdf5
