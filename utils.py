@@ -5,12 +5,16 @@ import seaborn as sns
 emotionDict = {0: "angry", 1: "disgust", 2: "fear", 3: "happy", 4: "sad", 5: "surprise", 6: "neutral"}
 
 
+def normalizeArray(array):
+    array = array.astype(np.float)
+    array /= 255.0
+    return array
+
+
 def preprocessImage(image):
     tmpImg = cv2.GaussianBlur(image, (3, 3), 5)
     img = cv2.addWeighted(image, 1.5, tmpImg, -0.5, 0)
     img = cv2.equalizeHist(img)
-    img = img.astype(np.float)
-    img /= 255.0
     return img
 
 
@@ -19,7 +23,7 @@ def flipImage(image):
     return cv2.flip(image, 1)
 
 
-def splitData(X, y, percentage):
+def splitDataRandomly(X, y, percentage):
     s = X.shape
     mask = np.random.rand(s[0]) <= percentage
     X_train = X[mask]

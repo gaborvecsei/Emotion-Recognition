@@ -25,7 +25,7 @@ startTime = time.clock()
 with open(os.path.join(SAVE_MODEL_FOLDER_PATH, "model_structure.json"), "r") as f:
     loadedModelStructure = f.read()
 model = model_from_json(loadedModelStructure)
-model.load_weights(os.path.join(SAVE_MODEL_FOLDER_PATH, "model_weights_10_epochs.h5"))
+model.load_weights(os.path.join(SAVE_MODEL_FOLDER_PATH, "model_weights_30_epochs.h5"))
 endTime = time.clock()
 print("Model is loaded in {0:.2f} seconds".format(endTime - startTime))
 
