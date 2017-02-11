@@ -10,7 +10,7 @@ from keras.layers import Convolution2D, MaxPooling2D, Dense, Flatten, Dropout
 from keras.models import Sequential
 from keras.utils.np_utils import to_categorical
 
-from customCallbacks import LogTraining, SlackNotifier
+from customCallbacks import LogTraining
 from dataGenerator import data_generator
 
 K.set_image_dim_ordering('th')
@@ -49,16 +49,16 @@ samples_per_epoch = 20480
 nb_epoch = 10
 
 model = Sequential()
-model.add(Convolution2D(64, 3, 3, border_mode='same', activation='elu', input_shape=train_image_shape))
+model.add(Convolution2D(32, 3, 3, border_mode='same', activation='elu', input_shape=train_image_shape))
+model.add(MaxPooling2D(pool_size=(2, 2)))
+
+model.add(Convolution2D(32, 3, 3, border_mode='same', activation='elu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 
 model.add(Convolution2D(64, 3, 3, border_mode='same', activation='elu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 
 model.add(Convolution2D(128, 3, 3, border_mode='same', activation='elu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-
-model.add(Convolution2D(256, 3, 3, border_mode='same', activation='elu'))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 
 model.add(Flatten())
@@ -82,9 +82,7 @@ checkPoint = ModelCheckpoint(os.path.join(CHECKPOINT_FOLDER_PATH, "weights-{epoc
 logTraining = LogTraining(os.path.join(VISUALIZATION_FOLDER_PATH, "training_log_{0}_epochs.txt".format(nb_epoch)))
 tensorboard = TensorBoard(log_dir=os.path.join(SAVE_MODEL_FOLDER_PATH, "tensorboard_logs"), histogram_freq=0,
                           write_graph=False, write_images=True)
-slackNotifier = SlackNotifier("xoxp-133638627843-133707362674-133898083956-36217820cda1e6d43161f0894437bd5a",
-                              channelName="notifications")
-callbacks = [checkPoint, logTraining, tensorboard, slackNotifier]
+callbacks = [checkPoint, logTraining, tensorboard]
 
 startTime = time.clock()
 hist = model.fit_generator(data_generator(batch_size, X_train, y_train, augmentation=True),

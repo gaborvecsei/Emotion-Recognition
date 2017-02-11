@@ -10,7 +10,9 @@ df = pd.read_csv('data/fer2013.csv', header=0)
 labels = list(df['emotion'])
 print("Label frequencies: {0}".format(dict(Counter(labels))))
 
+# images
 X = []
+# labels
 y = []
 
 for i in range(df.shape[0]):

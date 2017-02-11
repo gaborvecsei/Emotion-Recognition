@@ -1,5 +1,6 @@
 import os
 import random
+import sys
 import time
 
 import matplotlib
@@ -17,23 +18,35 @@ K.set_image_dim_ordering('th')
 # Magic...
 tf.python.control_flow_ops = tf
 
+############## Load model ############x
+
 SAVE_MODEL_FOLDER_PATH = "./savedModel"
+MODEL_STRUCTURE_FILE_NAME = "model_structure.json"
+MODEL_WEIGHTS_FILE_NAME = "model_weights_30_epochs.h5"
 DATA_FOLDER_PATH = "./data"
 
 print("Loading model...")
-startTime = time.clock()
-with open(os.path.join(SAVE_MODEL_FOLDER_PATH, "model_structure.json"), "r") as f:
-    loadedModelStructure = f.read()
-model = model_from_json(loadedModelStructure)
-model.load_weights(os.path.join(SAVE_MODEL_FOLDER_PATH, "model_weights_30_epochs.h5"))
-endTime = time.clock()
-print("Model is loaded in {0:.2f} seconds".format(endTime - startTime))
+try:
+    startTime = time.clock()
+    with open(os.path.join(SAVE_MODEL_FOLDER_PATH, MODEL_STRUCTURE_FILE_NAME), "r") as f:
+        loadedModelStructure = f.read()
+    model = model_from_json(loadedModelStructure)
+    model.load_weights(os.path.join(SAVE_MODEL_FOLDER_PATH, MODEL_WEIGHTS_FILE_NAME))
+    endTime = time.clock()
+    print("Model is loaded in {0:.2f} seconds".format(endTime - startTime))
+except FileNotFoundError as e:
+    print(e)
+    print("No saved modeil found in {}".format(SAVE_MODEL_FOLDER_PATH))
+    sys.exit(1)
+
+############# Predict ###############
 
 df = pd.read_csv(os.path.join(DATA_FOLDER_PATH, "fer2013.csv"), header=0)
 
 # Choose random <nb_tests> images and predict them
 nb_tests = 16
 
+# Store predictions for further use
 # [{'image':numpyArray, 'label':'happy', 'accuracy':99.10, 'raw_prediction':[...], 'original_label':2}, {...}, ...]
 prediction_data = []
 
@@ -65,16 +78,15 @@ for i in range(nb_tests):
               'raw_prediction': raw_prediction, 'original_label': original_label}
     prediction_data.append(p_data)
 
+############# Visualize the predictions ###########xx
 
-# Visualize the predictions
+# find closes sqrt number to the nb_test so we can create a grid for the visualization
 sqrtNumber = findBiggerSqrtNumber(len(prediction_data))
 fig = plt.figure(figsize=(10, 10))
 for i, p in enumerate(prediction_data):
     img = p['image']
     label = p['label']
     conf = p['confidence']
-    raw = p['raw_prediction']
-    o_label = p['original_label']
 
     ax = fig.add_subplot(sqrtNumber, sqrtNumber, i + 1)
     ax.imshow(img, cmap=matplotlib.cm.gray)

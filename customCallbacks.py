@@ -39,7 +39,7 @@ class LogTraining(Callback):
 
 class SlackNotifier(Callback):
     """
-    Sends you message at Slack when the training is finished
+    Sends you a message at Slack when the training is finished
     """
 
     def __init__(self, slackToken, botName="Notifier Bot", channelName="Training Notification"):
