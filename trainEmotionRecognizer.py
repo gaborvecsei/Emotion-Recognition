@@ -11,7 +11,7 @@ from keras.models import Sequential
 from keras.utils.np_utils import to_categorical
 
 from customCallbacks import LogTraining
-from dataGenerator import data_generator
+from dataGenerator import data_generator, datagen_horizontal_flip
 
 K.set_image_dim_ordering('th')
 # Magic...
@@ -28,10 +28,10 @@ CHECKPOINT_FOLDER_PATH = os.path.join(SAVE_MODEL_FOLDER_PATH, "trainCheckpoints"
 VISUALIZATION_FOLDER_PATH = os.path.join(SAVE_MODEL_FOLDER_PATH, "visualization")
 
 # Train data
-# X: (n_samples, 1, rows, cols)
+# X: (n_samples, rows, cols)
 # Y: (n_samples, n_category)
 X_train = np.load(TRAIN_X_PATH).astype(np.uint8)
-# Load and one-hot-encode
+# Load and one-hot-encode the labels
 y_train = to_categorical(np.load(TRAIN_Y_PATH).astype(np.uint8))
 
 print("X shape: {0}\nY shape: {1}".format(X_train.shape, y_train.shape))
@@ -40,6 +40,7 @@ print("X shape: {0}\nY shape: {1}".format(X_train.shape, y_train.shape))
 image_shape = (X_train.shape[1], X_train.shape[2])
 # train data shape: (1, rows, cols)
 train_image_shape = (1,) + image_shape
+
 print("Image shape: {0}".format(image_shape))
 print("Train image shape: {0}".format(train_image_shape))
 print("Output layer dim: {0}".format(y_train.shape[1]))
@@ -68,6 +69,8 @@ model.add(Dense(512, activation='elu'))
 model.add(Dropout(0.5))
 model.add(Dense(y_train.shape[1], activation='softmax'))
 
+# Uncomment this if you would like to continue a training from a checkpoint:
+
 # existing_model_weights_path = os.path.join(SAVE_MODEL_FOLDER_PATH, "model_weights_10_epochs.h5")
 # if os.path.exists(existing_model_weights_path):
 #     print("Loading weights...")
@@ -75,17 +78,17 @@ model.add(Dense(y_train.shape[1], activation='softmax'))
 
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-checkPoint = ModelCheckpoint(os.path.join(CHECKPOINT_FOLDER_PATH, "weights-{epoch:02d}-{loss:.2f}-{acc:.2f}.hdf5"),
+checkpoint = ModelCheckpoint(os.path.join(CHECKPOINT_FOLDER_PATH, "weights-{epoch:02d}-{loss:.2f}-{acc:.2f}.hdf5"),
                              monitor="loss",
                              save_best_only=True,
                              save_weights_only=True)
-logTraining = LogTraining(os.path.join(VISUALIZATION_FOLDER_PATH, "training_log_{0}_epochs.txt".format(nb_epoch)))
+log_training = LogTraining(os.path.join(VISUALIZATION_FOLDER_PATH, "training_log_{0}_epochs.txt".format(nb_epoch)))
 tensorboard = TensorBoard(log_dir=os.path.join(SAVE_MODEL_FOLDER_PATH, "tensorboard_logs"), histogram_freq=0,
                           write_graph=False, write_images=True)
-callbacks = [checkPoint, logTraining, tensorboard]
+callbacks = [checkpoint, log_training, tensorboard]
 
 startTime = time.clock()
-hist = model.fit_generator(data_generator(batch_size, X_train, y_train, augmentation=True),
+hist = model.fit_generator(data_generator(batch_size, X_train, y_train, image_data_generator=datagen_horizontal_flip),
                            samples_per_epoch=samples_per_epoch, nb_epoch=nb_epoch,
                            verbose=1,
                            callbacks=callbacks)

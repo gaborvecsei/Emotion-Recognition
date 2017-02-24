@@ -1,9 +1,0 @@
-Flask
-gunicorn
-numpy
-matplotlib
-brewer2mpl
-pillow
-seaborn
-tensorflow
-h5py

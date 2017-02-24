@@ -11,14 +11,14 @@ import tensorflow as tf
 from keras import backend as K
 from keras.models import model_from_json
 
-from utils import preprocessImage, emotionDict, findBiggerSqrtNumber
+from utils import preprocess_image, emotion_dict, find_bigger_sqrt_number
 
 K.set_image_dim_ordering('th')
 
 # Magic...
 tf.python.control_flow_ops = tf
 
-############## Load model ############x
+############## Load model #############
 
 SAVE_MODEL_FOLDER_PATH = "./savedModel"
 MODEL_STRUCTURE_FILE_NAME = "model_structure.json"
@@ -27,13 +27,13 @@ DATA_FOLDER_PATH = "./data"
 
 print("Loading model...")
 try:
-    startTime = time.clock()
+    start_time = time.clock()
     with open(os.path.join(SAVE_MODEL_FOLDER_PATH, MODEL_STRUCTURE_FILE_NAME), "r") as f:
-        loadedModelStructure = f.read()
-    model = model_from_json(loadedModelStructure)
+        loaded_model_structure = f.read()
+    model = model_from_json(loaded_model_structure)
     model.load_weights(os.path.join(SAVE_MODEL_FOLDER_PATH, MODEL_WEIGHTS_FILE_NAME))
-    endTime = time.clock()
-    print("Model is loaded in {0:.2f} seconds".format(endTime - startTime))
+    end_time = time.clock()
+    print("Model is loaded in {0:.2f} seconds".format(end_time - start_time))
 except FileNotFoundError as e:
     print(e)
     print("No saved modeil found in {}".format(SAVE_MODEL_FOLDER_PATH))
@@ -43,52 +43,55 @@ except FileNotFoundError as e:
 
 df = pd.read_csv(os.path.join(DATA_FOLDER_PATH, "fer2013.csv"), header=0)
 
-# Choose random <nb_tests> images and predict them
+# Number of test images
 nb_tests = 16
 
-# Store predictions for further use
+# Store predictions
 # [{'image':numpyArray, 'label':'happy', 'accuracy':99.10, 'raw_prediction':[...], 'original_label':2}, {...}, ...]
 prediction_data = []
 
 for i in range(nb_tests):
     # String to int array
-    rndNumber = random.randint(0, df.shape[0])
-    img = df["pixels"][rndNumber].split(" ")
-    original_label = df["emotion"][rndNumber]
+    rnd_number = random.randint(0, df.shape[0])
+    img = df["pixels"][rnd_number].split(" ")
+    original_label_index = df["emotion"][rnd_number]
+
     img = np.array(img, np.uint8)
-    # 1D to 2D
     img = np.reshape(img, (48, 48))
 
-    startTime = time.clock()
-    processedImage = preprocessImage(img)
-    imgForPrediction = np.reshape(processedImage, (1, 1, 48, 48))
+    start_time = time.clock()
+    processed_image = preprocess_image(img)
+    img_for_prediction = np.reshape(processed_image, (1, 1, 48, 48))
 
-    raw_prediction = model.predict_proba(imgForPrediction, verbose=0)[0]
+    raw_prediction = model.predict_proba(img_for_prediction, verbose=0)[0]
     prediction_index = np.argmax(raw_prediction)
     prediction_confidence = raw_prediction[prediction_index]
-    prediction_label = emotionDict[prediction_index]
-    original_label = emotionDict[original_label]
-    endTime = time.clock()
+    prediction_label = emotion_dict[prediction_index]
+    original_label = emotion_dict[original_label_index]
+    end_time = time.clock()
 
     print("Predicted label: {0} with {1:.2f}% confidence in {2:.3f} senconds".format(prediction_label,
                                                                                      (prediction_confidence * 100),
-                                                                                     endTime - startTime))
+                                                                                     end_time - start_time))
 
     p_data = {'image': img, 'label': prediction_label, 'confidence': prediction_confidence,
               'raw_prediction': raw_prediction, 'original_label': original_label}
+
     prediction_data.append(p_data)
 
-############# Visualize the predictions ###########xx
+############# Visualize the predictions ###########
 
 # find closes sqrt number to the nb_test so we can create a grid for the visualization
-sqrtNumber = findBiggerSqrtNumber(len(prediction_data))
+sqrt_number = find_bigger_sqrt_number(len(prediction_data))
+
 fig = plt.figure(figsize=(10, 10))
+
 for i, p in enumerate(prediction_data):
     img = p['image']
     label = p['label']
     conf = p['confidence']
 
-    ax = fig.add_subplot(sqrtNumber, sqrtNumber, i + 1)
+    ax = fig.add_subplot(sqrt_number, sqrt_number, i + 1)
     ax.imshow(img, cmap=matplotlib.cm.gray)
 
     plt.xticks(np.array([]))

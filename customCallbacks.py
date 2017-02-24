@@ -9,31 +9,31 @@ class LogTraining(Callback):
     Logs the training at each epoch to a txt file
     """
 
-    def __init__(self, filePath):
+    def __init__(self, file_path):
         """
-        :param filePath: Path to the file
+        :param file_path: Path to the file
         """
 
         super().__init__()
-        self.filePath = filePath
-        self.startTime = None
-        self.endTime = None
+        self.file_path = file_path
+        self.start_time = None
+        self.end_time = None
 
     def on_train_begin(self, logs=None):
-        self.startTime = time.clock()
-        self.endTime = None
+        self.start_time = time.clock()
+        self.end_time = None
 
     def on_epoch_end(self, epoch, logs=None):
         text = "Epoch: {0}; Loss: {1}, Accuracy: {2}".format(epoch, logs.get('loss'), logs.get('acc'))
-        self.appendTextToFile(text)
+        self.append_text_to_file(text)
 
     def on_train_end(self, logs=None):
-        self.endTime = time.clock()
-        text = "Trained in: {0} seconds".format(self.endTime - self.startTime)
-        self.appendTextToFile(text)
+        self.end_time = time.clock()
+        text = "Trained in: {0} seconds".format(self.end_time - self.start_time)
+        self.append_text_to_file(text)
 
-    def appendTextToFile(self, text):
-        with open(self.filePath, "a") as f:
+    def append_text_to_file(self, text):
+        with open(self.file_path, "a") as f:
             f.write(text + "\n")
 
 
@@ -42,18 +42,18 @@ class SlackNotifier(Callback):
     Sends you a message at Slack when the training is finished
     """
 
-    def __init__(self, slackToken, botName="Notifier Bot", channelName="Training Notification"):
+    def __init__(self, slack_token, bot_name="Notifier Bot", channel_name="Training Notification"):
         """
-        :param slackToken: Generate token for your slack team: https://api.slack.com/docs/oauth-test-tokens
-        :param botName: Name of your bot (can be anything)
-        :param channelName: Name of an existing channel at your slack team
+        :param slack_token: Generate token for your slack team: https://api.slack.com/docs/oauth-test-tokens
+        :param bot_name: Name of your bot (can be anything)
+        :param channel_name: Name of an existing channel at your slack team
         """
 
         super().__init__()
-        self.botName = botName
-        self.channelName = channelName
-        self.slackToken = slackToken
-        self.slackClient = SlackClient(self.slackToken)
+        self.bot_name = bot_name
+        self.channel_name = channel_name
+        self.slack_token = slack_token
+        self.slack_client = SlackClient(self.slack_token)
 
         self.accs = []
         self.losses = []
@@ -65,9 +65,9 @@ class SlackNotifier(Callback):
 
     def on_train_end(self, logs=None):
         super().on_train_end(logs)
-        self.sendNotification(
+        self.send_notification(
             "Training ended! :smile: \n" + "Accuracy: {0}\nLoss: {1}".format(self.accs[-1], self.losses[-1]))
 
-    def sendNotification(self, message):
-        self.slackClient.api_call('chat.postMessage', text=message, channel=self.channelName, username=self.botName,
-                                  icon_emoji=":robot_face:")
+    def send_notification(self, message):
+        self.slack_client.api_call('chat.postMessage', text=message, channel=self.channel_name, username=self.bot_name,
+                                   icon_emoji=":robot_face:")

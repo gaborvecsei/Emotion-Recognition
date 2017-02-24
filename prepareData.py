@@ -3,14 +3,14 @@ from collections import Counter
 import numpy as np
 import pandas as pd
 
-from utils import preprocessImage, flipImage, splitDataRandomly
+from utils import preprocess_image, flip_image, split_data_randomly
 
 df = pd.read_csv('data/fer2013.csv', header=0)
 
 labels = list(df['emotion'])
 print("Label frequencies: {0}".format(dict(Counter(labels))))
 
-# images
+# images as 48x48
 X = []
 # labels
 y = []
@@ -32,8 +32,7 @@ for i in range(df.shape[0]):
 X = np.array(X)
 y = np.array(y)
 
-# Split the data: training - testing
-X_train, y_train, X_test, y_test = splitDataRandomly(X, y, 0.9)
+X_train, y_train, X_test, y_test = split_data_randomly(X, y, 0.9)
 
 print("X_train shape: {0}\ny_train shape: {1}".format(X_train.shape, y_train.shape))
 print("X_test shape: {0}\ny_test shape: {1}".format(X_test.shape, y_test.shape))
