@@ -88,10 +88,12 @@ tensorboard = TensorBoard(log_dir=os.path.join(SAVE_MODEL_FOLDER_PATH, "tensorbo
 callbacks = [checkpoint, log_training, tensorboard]
 
 startTime = time.clock()
-hist = model.fit_generator(data_generator(batch_size, X_train, y_train, image_data_generator=datagen_horizontal_flip, augment_brightness=True),
-                           samples_per_epoch=samples_per_epoch, nb_epoch=nb_epoch,
-                           verbose=1,
-                           callbacks=callbacks)
+hist = model.fit_generator(
+    data_generator(batch_size, X_train, y_train, image_data_generator=datagen_horizontal_flip, augment_brightness=True,
+                   augment_shadows=True),
+    samples_per_epoch=samples_per_epoch, nb_epoch=nb_epoch,
+    verbose=1,
+    callbacks=callbacks)
 endTime = time.clock()
 
 print("Model is trained in {0} seconds!".format(endTime - startTime))
