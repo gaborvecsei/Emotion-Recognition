@@ -1,10 +1,10 @@
 import random
+import cv2
 import numpy as np
 from keras.preprocessing.image import ImageDataGenerator
 
 from utils import preprocess_image, normalize_array
 
-# Example data generators:
 
 datagen_all = ImageDataGenerator(
     rotation_range=5,
@@ -18,7 +18,20 @@ datagen_all = ImageDataGenerator(
 datagen_horizontal_flip = ImageDataGenerator(horizontal_flip=True)
 
 
-def data_generator(batch_size, X, y, image_data_generator=None):
+def augment_brightness_on_image(image_gray):
+    image_rgb = cv2.cvtColor(image_gray, cv2.COLOR_GRAY2RGB)
+    image_hsv = cv2.cvtColor(image_rgb, cv2.COLOR_RGB2HSV)
+    image_hsv = np.array(image_hsv, dtype=np.float64)
+    random_bright = .5 + np.random.uniform()
+    image_hsv[:, :, 2] = image_hsv[:, :, 2] * random_bright
+    image_hsv[:, :, 2][image_hsv[:, :, 2] > 255] = 255
+    image_hsv = np.array(image_hsv, dtype=np.uint8)
+    image_rgb = cv2.cvtColor(image_hsv, cv2.COLOR_HSV2RGB)
+    image_gray = cv2.cvtColor(image_rgb, cv2.COLOR_RGB2GRAY)
+    return image_gray
+
+
+def data_generator(batch_size, X, y, image_data_generator=None, augment_brightness=False):
     while 1:
         batch_X, batch_y = [], []
         for i in range(batch_size):
@@ -27,6 +40,9 @@ def data_generator(batch_size, X, y, image_data_generator=None):
             image = X[randomIndex]
             label = y[randomIndex]
             image = preprocess_image(image)
+
+            if augment_brightness:
+                image = augment_brightness_on_image(image)
 
             if image_data_generator is not None:
                 # Extend the dimensions for data augmentation: (1, 1, 48, 48)
