@@ -37,6 +37,7 @@ try:
 except FileNotFoundError as e:
     print(e)
     print("No saved modeil found in {}".format(SAVE_MODEL_FOLDER_PATH))
+    print("You should train one first!")
     sys.exit(1)
 
 ############# Predict ###############

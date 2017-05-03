@@ -1,5 +1,6 @@
 import os
 import time
+from configparser import ConfigParser
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -10,12 +11,18 @@ from keras.layers import Convolution2D, MaxPooling2D, Dense, Flatten, Dropout
 from keras.models import Sequential
 from keras.utils.np_utils import to_categorical
 
-from customCallbacks import LogTraining
-from dataGenerator import data_generator, datagen_horizontal_flip
+from custom_callbacks import LogTraining
+from data_generator import data_generator, datagen_horizontal_flip
 
 K.set_image_dim_ordering('th')
 # Magic...
 tf.python.control_flow_ops = tf
+
+config = ConfigParser()
+config.read("config.ini")
+
+AUGMENT_BRIGHTNESS = config.get("training", "augmentBrightness")
+AUGMENT_SHADOWS = config.get("training", "augmentShadows")
 
 DATA_FOLDER_PATH = "./data"
 TRAIN_X_PATH = os.path.join(DATA_FOLDER_PATH, "X_train.npy")
@@ -89,8 +96,8 @@ callbacks = [checkpoint, log_training, tensorboard]
 
 startTime = time.clock()
 hist = model.fit_generator(
-    data_generator(batch_size, X_train, y_train, image_data_generator=datagen_horizontal_flip, augment_brightness=True,
-                   augment_shadows=True),
+    data_generator(batch_size, X_train, y_train, image_data_generator=datagen_horizontal_flip, augment_brightness=AUGMENT_BRIGHTNESS,
+                   augment_shadows=AUGMENT_SHADOWS),
     samples_per_epoch=samples_per_epoch, nb_epoch=nb_epoch,
     verbose=1,
     callbacks=callbacks)
