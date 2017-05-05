@@ -12,7 +12,7 @@ from utils import preprocess_image, EMOTION_DICT
 K.set_image_dim_ordering('th')
 tf.python.control_flow_ops = tf
 
-SAVED_MODEL_FOLDER_PATH = os.path.abspath('../../created_models/30_epoch_training')
+SAVED_MODEL_FOLDER_PATH = os.path.abspath('../created_models/30_epoch_training')
 SAVED_MODEL_STRUCTURE_FILE_PATH = os.path.join(SAVED_MODEL_FOLDER_PATH, "model_structure.json")
 SAVED_MODEL_WEIGHTS_FILE_PATH = os.path.join(SAVED_MODEL_FOLDER_PATH, "model_weights_30_epochs.h5")
 FACE_CASCADE_FILE_PATH = "./face_cascade.xml"
