@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import seaborn as sns
 
-emotion_dict = {0: "angry", 1: "disgust", 2: "fear", 3: "happy", 4: "sad", 5: "surprise", 6: "neutral"}
+EMOTION_DICT = {0: "angry", 1: "disgust", 2: "fear", 3: "happy", 4: "sad", 5: "surprise", 6: "neutral"}
 
 
 def normalize_array(image_array):

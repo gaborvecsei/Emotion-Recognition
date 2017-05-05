@@ -11,38 +11,38 @@ import tensorflow as tf
 from keras import backend as K
 from keras.models import model_from_json
 
-from utils import preprocess_image, emotion_dict, find_bigger_sqrt_number
+from utils import preprocess_image, EMOTION_DICT, find_bigger_sqrt_number
 
 K.set_image_dim_ordering('th')
 
 # Magic...
 tf.python.control_flow_ops = tf
 
-############## Load model #############
+# Load trained model
 
 SAVE_MODEL_FOLDER_PATH = "./savedModel"
-MODEL_STRUCTURE_FILE_NAME = "model_structure.json"
-MODEL_WEIGHTS_FILE_NAME = "model_weights_30_epochs.h5"
-DATA_FOLDER_PATH = "./data"
+MODEL_STRUCTURE_FILE_PATH = os.path.join(SAVE_MODEL_FOLDER_PATH, "model_structure.json")
+MODEL_WEIGHTS_FILE_PATH = os.path.join(SAVE_MODEL_FOLDER_PATH, "model_weights_30_epochs.h5")
+DATA_FER2013_PATH = os.path.join("./data", "fer2013.csv")
 
 print("Loading model...")
 try:
     start_time = time.clock()
-    with open(os.path.join(SAVE_MODEL_FOLDER_PATH, MODEL_STRUCTURE_FILE_NAME), "r") as f:
+    with open(MODEL_STRUCTURE_FILE_PATH, "r") as f:
         loaded_model_structure = f.read()
     model = model_from_json(loaded_model_structure)
-    model.load_weights(os.path.join(SAVE_MODEL_FOLDER_PATH, MODEL_WEIGHTS_FILE_NAME))
+    model.load_weights(MODEL_WEIGHTS_FILE_PATH)
     end_time = time.clock()
     print("Model is loaded in {0:.2f} seconds".format(end_time - start_time))
 except FileNotFoundError as e:
     print(e)
-    print("No saved modeil found in {}".format(SAVE_MODEL_FOLDER_PATH))
+    print("No saved model found in {}".format(SAVE_MODEL_FOLDER_PATH))
     print("You should train one first!")
     sys.exit(1)
 
-############# Predict ###############
+# Make predictions with model
 
-df = pd.read_csv(os.path.join(DATA_FOLDER_PATH, "fer2013.csv"), header=0)
+df = pd.read_csv(DATA_FER2013_PATH, header=0)
 
 # Number of test images
 nb_tests = 16
@@ -67,8 +67,8 @@ for i in range(nb_tests):
     raw_prediction = model.predict_proba(img_for_prediction, verbose=0)[0]
     prediction_index = np.argmax(raw_prediction)
     prediction_confidence = raw_prediction[prediction_index]
-    prediction_label = emotion_dict[prediction_index]
-    original_label = emotion_dict[original_label_index]
+    prediction_label = EMOTION_DICT[prediction_index]
+    original_label = EMOTION_DICT[original_label_index]
     end_time = time.clock()
 
     print("Predicted label: {0} with {1:.2f}% confidence in {2:.3f} senconds".format(prediction_label,
@@ -80,7 +80,7 @@ for i in range(nb_tests):
 
     prediction_data.append(p_data)
 
-############# Visualize the predictions ###########
+# Visualize predictions
 
 # find closes sqrt number to the nb_test so we can create a grid for the visualization
 sqrt_number = find_bigger_sqrt_number(len(prediction_data))

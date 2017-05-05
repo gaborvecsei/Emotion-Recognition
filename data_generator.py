@@ -18,6 +18,13 @@ datagen_horizontal_flip = ImageDataGenerator(horizontal_flip=True)
 
 
 def augment_brightness_on_image(image_gray):
+    """
+    Changes the brightness of the image
+
+    :param image_gray: grayscale image
+    :return: augmented grayscale image
+    """
+
     cv2.imwrite("art/image_augmentation/brightness_1_gray.png", image_gray)
     image_rgb = cv2.cvtColor(image_gray, cv2.COLOR_GRAY2RGB)
     image_hsv = cv2.cvtColor(image_rgb, cv2.COLOR_RGB2HSV)
@@ -36,6 +43,13 @@ def augment_brightness_on_image(image_gray):
 
 
 def add_random_shadow(image_gray):
+    """
+    Add random shadow to the image
+
+    :param image_gray: grayscale image
+    :return: augmented grayscale image
+    """
+
     cv2.imwrite("art/image_augmentation/shadow_1_gray.png", image_gray)
     image_rgb = cv2.cvtColor(image_gray, cv2.COLOR_GRAY2RGB)
     top_y = image_gray.shape[0] * np.random.uniform()
@@ -67,6 +81,16 @@ def add_random_shadow(image_gray):
 
 
 def data_generator(batch_size, X, y, image_data_generator=None, augment_brightness=False, augment_shadows=False):
+    """
+    Yields grayscale (1, 1, 48, 48) images
+
+    :param batch_size: batch size
+    :param X: input image array, contains images with shape: (48, 48)
+    :param y: input label array
+    :param image_data_generator: Keras data generator
+    :param augment_brightness: to change brightness or not to change brightness (holds skull up in the air)
+    :param augment_shadows: look at the line above
+    """
     while 1:
         batch_X, batch_y = [], []
         for i in range(batch_size):
@@ -76,15 +100,11 @@ def data_generator(batch_size, X, y, image_data_generator=None, augment_brightne
             label = y[randomIndex]
             image = preprocess_image(image)
 
-            cv2.imshow("ASD1", image)
             if augment_brightness:
                 image = augment_brightness_on_image(image)
-                cv2.imshow("ASD2", image)
 
             if augment_shadows:
                 image = add_random_shadow(image)
-                cv2.imshow("ASD3", image)
-            cv2.waitKey()
 
             if image_data_generator is not None:
                 # Extend the dimensions for data augmentation: (1, 1, 48, 48)

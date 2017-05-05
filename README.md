@@ -1,5 +1,7 @@
 # Emotion recognition from face
 
+Emotion recognition from faces with Deep Learning CNN network.
+
 ## Setup
 
 You will need:
@@ -15,6 +17,8 @@ You will need:
     1. prepare data
     2. train model
     3. test it
+        1. `predict_emotion.py` script
+        2. real time emotion recognition from webcam with `real_time_emotion.py`
 
 ## Prepare data
 
@@ -22,13 +26,13 @@ We have to prepare the data for the training
 
 - Download the `fer2013.csv` ([source](https://www.kaggle.com/c/challenges-in-representation-learning-facial-expression-recognition-challenge/data))
     - Move it to `data` folder and rename it to `fer2013.csv` if it is necessary
-    - OR
+        - OR
     - Edit the `config.ini` file
 - Run the `prepare_data.py` script
 - Now you have the data for the training which you can find in the `data` folder
 
-- **X_train** shape: `(nb_samples, 48, 48)`
-- **y_train** shape: `(nb_samples,)`
+- *X_train* shape: `(nb_samples, 48, 48)`
+- *y_train* shape: `(nb_samples,)`
 
 After this you can start the training!
 

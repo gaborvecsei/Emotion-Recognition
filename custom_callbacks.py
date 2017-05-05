@@ -2,11 +2,13 @@ import time
 
 from keras.callbacks import Callback
 from slackclient import SlackClient
+import configparser
 
 
 class LogTraining(Callback):
     """
-    Logs the training at each epoch to a txt file
+    Logs the training at each epoch to a .txt file
+    (loss and accuracy)
     """
 
     def __init__(self, file_path):
@@ -42,9 +44,8 @@ class SlackNotifier(Callback):
     Sends you a message at Slack when the training is finished
     """
 
-    def __init__(self, slack_token, bot_name="Notifier Bot", channel_name="Training Notification"):
+    def __init__(self, bot_name="Notifier Bot", channel_name="Training Notification"):
         """
-        :param slack_token: Generate token for your slack team: https://api.slack.com/docs/oauth-test-tokens
         :param bot_name: Name of your bot (can be anything)
         :param channel_name: Name of an existing channel at your slack team
         """
@@ -52,7 +53,9 @@ class SlackNotifier(Callback):
         super().__init__()
         self.bot_name = bot_name
         self.channel_name = channel_name
-        self.slack_token = slack_token
+        config = configparser.ConfigParser()
+        config.read('config.ini')
+        self.slack_token = config.get("slack", "token")
         self.slack_client = SlackClient(self.slack_token)
 
         self.accs = []
