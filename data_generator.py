@@ -1,4 +1,5 @@
 import random
+
 import cv2
 import numpy as np
 from keras.preprocessing.image import ImageDataGenerator
@@ -112,13 +113,13 @@ def data_generator(batch_size, X, y, image_data_generator=None, augment_brightne
 
                 # augments data
                 # yields (1, 1, 48, 48) images
-                i = 0
+                k = 0
                 for augmented_image in image_data_generator.flow(image, batch_size=1):
                     processed_for_training = normalize_array(augmented_image.reshape(1, 48, 48))
                     batch_X.append(processed_for_training)
                     batch_y.append(label)
-                    i += 1
-                    if i == 1:
+                    k += 1
+                    if k == 1:
                         break
             else:
                 batch_X.append(image)

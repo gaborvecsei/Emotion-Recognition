@@ -1,15 +1,15 @@
+import configparser
 from collections import Counter
 
 import numpy as np
 import pandas as pd
-import configparser
 
-from utils import preprocess_image, flip_image, split_data_randomly
+from utils import split_data_randomly
 
 config = configparser.ConfigParser()
 config.read('config.ini')
 fer2013_path = config.get("data", "fer2013Path")
-train_test_split = config.get("data", "trainTestSplit")
+train_test_split = config.getfloat("data", "trainTestSplit")
 
 df = pd.read_csv(fer2013_path, header=0)
 
